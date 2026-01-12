@@ -7,11 +7,11 @@ echo ------------------------------------------------
 if not exist output mkdir output
 
 :: 2. Copy VM Graphics Fix (if present)
-if exist opengl32.dll (
+if exist output/opengl32.dll (
     copy /Y opengl32.dll output\ >nul
     echo [OK] OpenGL Fix copied.
 )
-if not exist raylib.dll (
+if not exist output/raylib.dll (
     echo [WARN] raylib.dll not yet found! Pulling it from the source file...
     copy /Y raylib.dll output\
 ) else (
