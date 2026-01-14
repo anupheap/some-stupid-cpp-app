@@ -1,13 +1,13 @@
-# some-stupid-cpp-app
+# Student Group Registration App
 
-This app is built as a submission for the C++ finals for C++ Programming Class
+This app is built as a submission for the finals for C++ programming class at Institute of Technology of Cambodia
 
 ## 🚀 Features
-GUI
+GUI App
 
 ## 🛠 Prerequisites
 * **C++ Compiler:** Supports C++17 or higher
-* **Build System:** [CMake](https://cmake.org/) (version 3.15+)
+* **Build System:** g++
 * **Dependencies:** raylib
 
 ## 📦 Building the Project
