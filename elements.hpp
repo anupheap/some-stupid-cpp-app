@@ -59,10 +59,12 @@ void Button::Draw(Vector2 buttonPos, float scale, float rot)
     }
     else if (CheckCollisionPointRec(GetMousePosition(), collisionBox))
     {
+        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         DrawTexturePro(textureWhenHover, sourceRect, destinationRect, origin, 0, WHITE);
     }
     else
     {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         DrawTexturePro(textureStandalone, sourceRect, destinationRect, origin, 0, WHITE);
     }
 }
