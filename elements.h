@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ELEMENTS_H
+#define ELEMENTS_H
 
 #include <string>
 #include <iostream>
@@ -141,3 +142,4 @@ int IDinputValidation(char* numberInput){
     }
     return 0;
 }
+#endif
