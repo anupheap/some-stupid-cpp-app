@@ -8,7 +8,8 @@
 typedef enum
 {
     SCREEN_LOGIN,
-    SEMESTER_SCREEN
+    SEMESTER_SCREEN,
+    MAIN_MENU
 } GameScreen;
 
 // Main Program
@@ -98,6 +99,8 @@ int main()
             370,
             30
         };
+        char imgPath[] = "output\\assets\\images\\sample.png";
+        Texture2D back = LoadTexture(imgPath);
         
     //Initialize TextBox Buffers
     char errorMessageForName[200] = "\0";
@@ -115,6 +118,7 @@ int main()
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
+        DrawTexture(back, 0, 0, WHITE);
         GuiSetStyle(DEFAULT, TEXT_SIZE, 30);
         //====LOGIN-SCREEN====
         if (currentScreen == SCREEN_LOGIN)
@@ -210,8 +214,19 @@ int main()
         }
         if (currentScreen == SEMESTER_SCREEN){
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-            DrawText("AAAAAAAAARRRRRRRRMMMMMMM BOOOOOOOOOOOOOOOOOOOOOOY!!!!!!!", 0, GetScreenHeight()/2, 30, GREEN);
+            Vector2 semDetTitleScale = MeasureTextEx(sekuya40, "SEMESTER DETAILS", titleScale, spacing);
+            DrawTextEx(sekuya40, "SEMESTER DETAILS", {GetScreenWidth()/2.0f - semDetTitleScale.x/2.0f, studentLoginTextPos.y}, titleScale, spacing, BLACK);
+
+            Vector2 semDetSemSelectScale = MeasureTextEx(orbitron30,"Semester (1-3):",subtitleScale, spacing);
+            DrawTextEx(orbitron30, "Semester (1-3):", {nameTextPos.x-semDetSemSelectScale.x/2.0f, nameTextPos.y}, subtitleScale, spacing, DARKGRAY);
+
+            Vector2 semDetYearSelectScale = MeasureTextEx(orbitron30,"Year:",subtitleScale,spacing);
+            DrawTextEx(orbitron30, "Year:", {IDTextPos.x-semDetYearSelectScale.x/2.0f, IDTextPos.y}, subtitleScale, spacing, DARKGRAY);
+
+            next.Draw({(float)GetScreenWidth()/2, (float)GetScreenHeight()/1.6f}, 2, 0);
+            
         }
+        
         EndDrawing();
     }
     return 0;
