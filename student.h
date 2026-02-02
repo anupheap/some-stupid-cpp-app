@@ -22,21 +22,32 @@ const string GROUP_NAMES[4] = { "1E1", "1E2", "1E3", "1E4" };
 // --- Class Definition ---
 class Student {
 private:
-    string name;
-    string id;
+    char name[200];
+    char id[128];
     string semester;
     string year;
     vector<Registration> registrations;
 
 public:
     // Setters
-    void setName(string n) { name = n; }
-    void setID(string i) { id = i; }
-    void setSemester(string s, string y) { semester = s; year = y; }
+    void setName(char firstName[200], char lastName[200]){
+        strcpy(name, firstName);
+        strcat(name, " ");
+        strcat(name, lastName);
+    }
+    void setName(char firstName[200], char middleName[200], char lastName[200]){
+        strcpy(name, firstName);
+        strcat(name, " ");
+        strcat(name, middleName);
+        strcat(name, " ");
+        strcat(name, lastName);
+    }
+    void setID(char ID[128]) { strcpy(id, ID); }
+    void setSemester(int s, char y[5]) { semester = s; year = y; }
 
     // Getters
-    string getName() { return name; }
-    string getID() { return id; }
+    char* getName() { return name; }
+    char* getID() { return id; }
     string getSemester() { return semester; }
     string getYear() { return year; }
     

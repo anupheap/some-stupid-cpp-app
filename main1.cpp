@@ -4,6 +4,7 @@
 #include "student.h"
 #include "buttonsAndTextFields.hpp"
 #include "textsAndFonts.hpp"
+#include "student.h"
 
 // Screens
 typedef enum
@@ -31,6 +32,19 @@ int main()
     char confirmButtonPath[] = "assets\\textures\\confirm_button.png";
     char confirmButtonHoverPath[] = "assets\\textures\\confirm_button_hover.png";
     char confirmButtonClickedPath[] = "assets\\textures\\button_pressed.png";
+    //"Registration Button Textures"
+    char registerButtonPath[] = "assets\\textures\\registration_button.png";
+    char registerButtonHoverPath[] = "assets\\textures\\registration_button_hover.png";
+    char registerButtonClickedPath[] = "assets\\textures\\registration_button_clicked.png";
+    //View/Print Button Textures
+    char viewOrPrintButtonPath[] = "assets\\textures\\viewOrPrint_button.png";
+    char viewOrPrintButtonHoverPath[] = "assets\\textures\\viewOrPrint_button_hover.png";
+    char viewOrPrintButtonClickedPath[] = "assets\\textures\\viewOrPrint_button_clicked.png";
+    Image viewOrPrintButtonTexture = LoadImage(viewOrPrintButtonPath);
+    char exitButtonPath[] = "assets\\textures\\exit_button.png";
+    char exitButtonWhenHoverPath[] = "assets\\textures\\exit_button_hover.png";
+    char exitButtonWhenClickedPath[] = "assets\\textures\\exit_button_clicked.png";
+    Image exitButtonTexture = LoadImage(exitButtonPath);
     // App Icon
     char logoPath[] = "assets\\textures\\student_registration_logo.png";
     Image logo = LoadImage(logoPath);
@@ -52,7 +66,22 @@ int main()
         confirmButtonPath,
         confirmButtonHoverPath,
         confirmButtonClickedPath);
+    
+    Button registerButton(
+        registerButtonPath,
+        registerButtonHoverPath,
+        registerButtonClickedPath);
+    Button viewOrPrintButton(
+        viewOrPrintButtonPath,
+        viewOrPrintButtonHoverPath,
+        viewOrPrintButtonClickedPath
+    );
 
+    Button exitButton(
+        exitButtonPath,
+        exitButtonWhenHoverPath,
+        exitButtonWhenClickedPath
+    );
     SetWindowIcon(logo);
 
     Rectangle firstNameInputBox = {
@@ -125,6 +154,8 @@ int main()
     Color baseColor = {36, 34, 43, 255};
     Color baseTextColor = {150, 140, 171, 255};
     Color focusedTextColor = {204, 193, 230, 255};
+    int semesterSelection = 0;
+
     while (!WindowShouldClose())
     {
         BeginDrawing();
@@ -140,6 +171,17 @@ int main()
         GuiSetStyle(TEXTBOX, TEXT_COLOR_PRESSED, ColorToInt(WHITE));
         GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(focusedTextColor));
         GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(baseTextColor));
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_NORMAL, ColorToInt(baseColor));
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_PRESSED, ColorToInt(backgroundColor));
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_FOCUSED, ColorToInt(baseColor));
+        GuiSetStyle(DROPDOWNBOX, BORDER_WIDTH, 3);
+        GuiSetStyle(DROPDOWNBOX, BORDER_COLOR_FOCUSED, ColorToInt(baseColor));
+        GuiSetStyle(DROPDOWNBOX, BORDER_COLOR_NORMAL, ColorToInt(baseColor));
+        GuiSetStyle(DROPDOWNBOX, BORDER_COLOR_PRESSED, ColorToInt(purple));
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_DISABLED, ColorToInt(baseColor));
+        GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_PRESSED, ColorToInt(WHITE));
+        GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_FOCUSED, ColorToInt(focusedTextColor));
+        GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_NORMAL, ColorToInt(baseTextColor));
 
         //====LOGIN-SCREEN====
         if (currentScreen == SCREEN_LOGIN)
@@ -340,6 +382,12 @@ int main()
 
             if (firstNameValidity && IDValidity && middleNameValidity && lastNameValidity)
             {
+                if(strlen(middleNameBuffer) == 0){
+                    student.setName(firstNameBuffer, lastNameBuffer);
+                } else{
+                    student.setName(firstNameBuffer, middleNameBuffer, lastNameBuffer);
+                }
+                student.setID(IDBuffer);
                 currentScreen = SEMESTER_SCREEN;
             }
             else
@@ -360,41 +408,15 @@ int main()
             yearValidity = false;
 
             DrawTextEx(font.torus50, text.semesterDetailsText, text.semesterDetailsTextPos, text.titleScale, text.spacing, white);
-
             DrawTextEx(font.torus30, text.semesterText, text.semesterTextPos, text.subtitleScale, text.spacing, white);
-            DrawRectangleRec(semesterInputBox, baseColor);
+            //DrawTextEx(font.torus30, student.getName(), {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, text.subtitleScale, text.spacing, white);
             DrawRectangleRec(yearInputBox, baseColor);
-            if (GuiTextBox(semesterInputBox, semesterBuffer, 2, semesterToggle)) semesterToggle = !semesterToggle;
+            if (GuiDropdownBox(semesterInputBox, "1;2;3", &semesterSelection, semesterToggle)) semesterToggle = !semesterToggle;
             DrawTextEx(font.torus30, text.yearText, text.yearTextPos, text.subtitleScale, text.spacing, white);
             if (GuiTextBox(yearInputBox, yearBuffer, 5, yearToggle)) yearToggle = !yearToggle;
-            confirm.Draw({(float)GetScreenWidth() / 2, (float)text.yearTextPos.y + 100}, 0.3f, 0);
+            confirm.Draw({(float)GetScreenWidth() / 2, (float)text.yearTextPos.y + 130}, 0.3f, 0);
             if (confirm.isPressed())
             {
-                switch(semesterInputValidation(semesterBuffer)){
-                    case (IS_EMPTY):{
-                        semesterValidity = false;
-                        strcpy(errorMessageForSemester, "[ERROR]\tSemester is Empty!");
-                        break;
-                    }
-                    case (HAS_WHITESPACE):{
-                        semesterValidity = false;
-                        strcpy(errorMessageForSemester, "[ERROR]\tSemester is Empty!");
-                    }
-                    case (INVALID_CHOICE_FOR_SEMESTER):{
-                        semesterValidity = false;
-                        strcpy(errorMessageForSemester, "[ERROR]\tSemester should only be between 1-3!");
-                        break;
-                    }
-                    case (HAS_ALPHA_AND_OR_SYMBOLS):{
-                        semesterValidity = false;
-                        strcpy(errorMessageForSemester, "[ERROR]\tSemester should only have an Integer(s)!");
-                        break;
-                    }
-                    default:{
-                        semesterValidity = true;
-                        strcpy(errorMessageForSemester, "\0");
-                    }
-                }
                 switch(yearInputValidation(yearBuffer)){
                     case (IS_EMPTY):{
                         yearValidity = false;
@@ -417,7 +439,8 @@ int main()
                     }
                 }
             }
-            if(semesterValidity && yearValidity){
+            if(yearValidity){
+                student.setSemester(semesterSelection + 1, yearBuffer);
                 currentScreen = MAIN_MENU;
             }else{
                 DrawText(errorMessageForSemester, 10, errorMessageForSemesterPosY, 20, RED);
@@ -428,44 +451,27 @@ int main()
         // NEEDS WORK HERE  **NEEDS TEXTURES** 
         if (currentScreen == MAIN_MENU)
         {
-
-            // Button Calls
-            // REGISTER BUTTON PATHS !! NEEDS TEXTURES !! CURRENTLY USING PLACEHOLDER TEXTURES !!
-            char registerButtonPath[] = "assets\\textures\\confirm_button.png";
-            char registerButtonHoverPath[] = "assets\\textures\\confirm_button_hover.png";
-            char registerButtonClickedPath[] = "assets\\textures\\button_pressed.png";
-            // Register Button
-            Button registerButton(
-                registerButtonPath,
-                registerButtonHoverPath,
-                registerButtonClickedPath);
-            
-            // VIEWRECORD BUTTON PATHS !! NEEDS TEXTURES !! CURRENTLY USING PLACEHOLDER TEXTURES !!
-            char viewRecordButtonPath[] = "assets\\textures\\confirm_button.png";
-            char viewRecordButtonHoverPath[] = "assets\\textures\\confirm_button_hover.png";
-            char viewRecordButtonClickedPath[] = "assets\\textures\\button_pressed.png";
-            // ViewRecord Button
-            Button viewRecordButton(
-                viewRecordButtonPath,
-                viewRecordButtonHoverPath,
-                viewRecordButtonClickedPath);
-
-            // EXIT BUTTON PATHS !! NEEDS TEXTURES !! CURRENTLY USING PLACEHOLDER TEXTURES !!
-            char exitButtonPath[] = "assets\\textures\\confirm_button.png";
-            char exitButtonHoverPath[] = "assets\\textures\\confirm_button_hover.png";
-            char exitButtonClickedPath[] = "assets\\textures\\button_pressed.png";
-            // Exit Button
-            Button exitButton(
-                exitButtonPath,
-                exitButtonHoverPath,
-                exitButtonClickedPath);
-
             DrawTextEx(font.torus50, text.mainMenuText, {text.mainMenuTextPos.x, text.mainMenuTextPos.y}, text.titleScale, text.spacing, white);
-
             //Draw Buttons
-            registerButton.Draw({(float)GetScreenWidth() / 2, (float)text.yearTextPos.y}, 0.3f, 0);
-            viewRecordButton.Draw({(float)GetScreenWidth() / 2, (float)text.yearTextPos.y + 100}, 0.3f, 0);
-            exitButton.Draw({(float)GetScreenWidth() / 2, (float)text.yearTextPos.y + 200}, 0.3f, 0);
+            DrawRectangle(0, GetScreenHeight() - 70, GetScreenWidth(), 70, baseColor);
+            Rectangle viewOrPrintButtonCol = {
+                (GetScreenWidth()/2) + 415.0f,
+                GetScreenHeight() - 98.8f,
+                viewOrPrintButtonTexture.width * 0.4f,
+                viewOrPrintButtonTexture.height * 0.4f
+            };
+            Rectangle exitButtonCol = {
+                (GetScreenWidth()/2) - 585.0f,
+                GetScreenHeight() - 98.8f,
+                exitButtonTexture.width * 0.4f,
+                exitButtonTexture.height * 0.4f
+            };
+            viewOrPrintButton.Draw({((float)GetScreenWidth() / 2) + 500, (float)GetScreenHeight() - 49.4f}, 0.4f, 0);
+            exitButton.Draw({((float)GetScreenWidth() / 2) - 500, (float)GetScreenHeight() - 49.4f}, 0.4f, 0);
+            registerButton.Draw({((float)GetScreenWidth() / 2) + 300, (float)GetScreenHeight() - 49.4f}, 0.4f, 0);
+            if((CheckCollisionPointRec(GetMousePosition(), viewOrPrintButtonCol)) || CheckCollisionPointRec(GetMousePosition(), exitButtonCol)){
+                SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+            }
         }
         EndDrawing();
     }

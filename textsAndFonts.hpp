@@ -123,7 +123,7 @@ class texts{
         };
         yearTextPos = {
             semesterTextPos.x + getSemesterTextScale.x - getYearTextScale.x, 
-            semesterTextPos.y + 80
+            semesterTextPos.y + 130
         };
 
         //testing
