@@ -2,15 +2,17 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "student.h"
-#include "elements.hpp"
+#include "buttonsAndTextFields.hpp"
+#include "textsAndFonts.hpp"
 
 // Screens
 typedef enum
 {
     SCREEN_LOGIN,
     SEMESTER_SCREEN,
-    MAIN_MENU
-} GameScreen;
+    MAIN_MENU,
+    REGISTRATION_SCREEN
+} Screen;
 
 // Main Program
 int main()
@@ -19,214 +21,409 @@ int main()
     InitWindow(1280, 720, "Student Registration System");
     SetTargetFPS(60);
 
-    // Initialize Fonts
-        // Sekuya
-        char sekuyaPath[] = "assets\\fonts\\Sekuya-Regular.ttf";
-        Font sekuya40 = LoadFontEx(sekuyaPath, 50, 0, 0);
-        SetTextureFilter(sekuya40.texture, TEXTURE_FILTER_BILINEAR);
-        // Orbitron
-        char orbitronPath[] = "assets\\fonts\\Orbitron-SemiBold.ttf";
-        Font orbitron30 = LoadFontEx(orbitronPath, 30, 0, 0);
-
     // Initialize Textures
-        //"NEXT" Button Textures
-        char nextButtonPath[] = "assets\\textures\\next_button.png";
-        char nextButtonHoverPath[] = "assets\\textures\\next_hover.png";
-        char nextButtonClickedPath[] = "assets\\textures\\next_pressed.png";
+    //"NEXT" Button Textures
+    char nextButtonPath[] = "assets\\textures\\next_button.png";
+    char nextButtonHoverPath[] = "assets\\textures\\next_button_hover.png";
+    char nextButtonClickedPath[] = "assets\\textures\\button_clicked.png";
 
-        //"CONFIRM" Button Textures
-        char confirmButtonPath[] = "assets\\textures\\confirm_button.png";
-        char confirmButtonHoverPath[] = "assets\\textures\\confirm_hover.png";
-        char confirmButtonClickedPath[] = "assets\\textures\\confirm_pressed.png";
-        //App Icon
-        char logoPath[] = "assets\\textures\\student_registration_logo.png";
-        Image logo = LoadImage(logoPath);
-        ImageResizeNN(&logo, 256, 256);
+    //"CONFIRM" Button Textures
+    char confirmButtonPath[] = "assets\\textures\\confirm_button.png";
+    char confirmButtonHoverPath[] = "assets\\textures\\confirm_button_hover.png";
+    char confirmButtonClickedPath[] = "assets\\textures\\button_pressed.png";
+    // App Icon
+    char logoPath[] = "assets\\textures\\student_registration_logo.png";
+    Image logo = LoadImage(logoPath);
+    ImageResizeNN(&logo, 256, 256);
 
-    //Initialize Classes, Buttons, Text input Boxes and Game Screen
+    // Initialize Classes, Buttons, Text input Boxes and Game Screen
     Student student;
-    GameScreen currentScreen = SCREEN_LOGIN;
-    
-        //"NEXT" Button
-        Button next(
-            nextButtonPath,
-            nextButtonHoverPath,
-            nextButtonClickedPath
-        );
-        //"CONFIRM" button
-        Button confirm(
-            confirmButtonPath,
-            confirmButtonHoverPath,
-            confirmButtonClickedPath
-        );
+    Screen currentScreen = SCREEN_LOGIN;
+    textFonts font;
+    texts text(font);
+
+    //"NEXT" Button
+    Button next(
+        nextButtonPath,
+        nextButtonHoverPath,
+        nextButtonClickedPath);
+    //"CONFIRM" button
+    Button confirm(
+        confirmButtonPath,
+        confirmButtonHoverPath,
+        confirmButtonClickedPath);
 
     SetWindowIcon(logo);
-    //Text, Position, and Scale Variables so that we don't gouge our eyes out when reading the code cuz whAT THE FUCK
-    float spacing = 3.0f;
-    float titleScale = 50.0f;
-    float subtitleScale = 30.0f;
-        //"STUDENT LOGIN" text position
-        char studentLoginText[] = "STUDENT LOGIN";
-        Vector2 getStudentLoginTextScale = MeasureTextEx(sekuya40, studentLoginText, titleScale, spacing);
-        Vector2 studentLoginTextPos = {
-            (GetScreenWidth()/2) - (getStudentLoginTextScale.x/2),
-            (GetScreenHeight()/3.8f) - (getStudentLoginTextScale.y/2)
-        };
 
-        //"Name:" text position
-        char nameText[] = "Name:";
-        Vector2 getNameTextScale = MeasureTextEx(orbitron30, nameText, subtitleScale, spacing);
-        Vector2 nameTextPos = {
-            (GetScreenWidth() / 3.3f) - (getNameTextScale.x/2),
-            (GetScreenHeight() / 2.6f) - (getNameTextScale.y/2)
-        };
-        //"ID:" text position
-        char IDText[] = "ID:";
-        Vector2 getIDTextScale = MeasureTextEx(orbitron30, IDText, subtitleScale, spacing);
-        Vector2 IDTextPos = {
-            (GetScreenWidth() / 2.88f) - (getNameTextScale.x/2),
-            (GetScreenHeight() / 1.9f) - (getNameTextScale.y/2)
-        };
-        Rectangle nameInputBox = {
-            GetScreenWidth()/2.8f,
-            GetScreenHeight()/2.585f - (getNameTextScale.y/2),
-            370,
-            30
-        };
-        Rectangle IDInputBox = {
-            GetScreenWidth()/2.8f,
-            GetScreenHeight()/1.885f - (getIDTextScale.y/2),
-            370,
-            30
-        };
-        char imgPath[] = "output\\assets\\images\\sample.png";
-        Texture2D back = LoadTexture(imgPath);
-        
-    //Initialize TextBox Buffers
-    char errorMessageForName[200] = "\0";
+    Rectangle firstNameInputBox = {
+        GetScreenWidth() / 2.8f,
+        GetScreenHeight() / 3.37f - (text.getFirstNameTextScale.y / 2),
+        370,
+        30};
+
+    Rectangle middleNameInputBox = {
+        GetScreenWidth() / 2.8f,
+        GetScreenHeight() / 2.47f - (text.getMiddleNameTextScale.y / 2),
+        370,
+        30};
+    Rectangle lastNameInputBox = {
+        GetScreenWidth() / 2.8f,
+        GetScreenHeight() / 1.95f - (text.getLastNameTextScale.y / 2),
+        370,
+        30};
+    Rectangle IDInputBox = {
+        GetScreenWidth() / 2.8f,
+        GetScreenHeight() / 1.59f - (text.getIDTextScale.y / 2),
+        370,
+        30};
+    Rectangle semesterInputBox = {
+        GetScreenWidth() / 2.8f,
+        text.semesterTextPos.y,
+        370,
+        30};
+    Rectangle yearInputBox = {
+        GetScreenWidth() / 2.8f,
+        text.yearTextPos.y,
+        370,
+        30};
+    char imgPath[] = "output\\assets\\images\\sample.png";
+    Image sample = LoadImage(imgPath);
+    ImageResizeNN(&sample, 1280, 720);
+    Texture2D back = LoadTextureFromImage(sample);
+    UnloadImage(sample);
+
+    // Initialize TextBox Buffers
+    char errorMessageForFirstName[200] = "\0";
+    char errorMessageForMiddleName[200] = "\0";
+    char errorMessageForLastName[200] = "\0";
     char errorMessageForID[200] = "\0";
-    char nameBuffer[128] = "\0";
-    char IDBuffer[128] = "";
-    bool nameToggle = false;
+    char errorMessageForSemester[200] = "\0";
+    char errorMessageForYear[200] = "\0";
+    char firstNameBuffer[128] = "\0";
+    char middleNameBuffer[128] = "\0";
+    char lastNameBuffer[128] = "\0";
+    char IDBuffer[128] = "\0";
+    char semesterBuffer[128] = "\0";
+    char yearBuffer[128] = "\0";
+    bool firstNameToggle = false;
+    bool middleNameToggle = false;
+    bool lastNameToggle = false;
     bool IDBoxToggle = false;
+    bool semesterToggle = false;
+    bool yearToggle = false;
 
-    //Initialize Validifiers
-    bool nameValidity = false;
+    // Initialize Validifiers
+    bool firstNameValidity = false;
+    bool middleNameValidity = false;
+    bool lastNameValidity = false;
     bool IDValidity = false;
-
+    bool semesterValidity = false;
+    bool yearValidity = false;
+    Color white = WHITE;
+    Color purple = {140, 102, 255, 255};
+    Color backgroundColor = {49, 46, 56, 255};
+    Color baseColor = {36, 34, 43, 255};
+    Color baseTextColor = {150, 140, 171, 255};
+    Color focusedTextColor = {204, 193, 230, 255};
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawTexture(back, 0, 0, WHITE);
+        ClearBackground(backgroundColor);
+
+        GuiSetFont(font.textboxTorus30);
         GuiSetStyle(DEFAULT, TEXT_SIZE, 30);
+        GuiSetStyle(TEXTBOX, BORDER_WIDTH, 3);
+        GuiSetStyle(TEXTBOX, BORDER_COLOR_NORMAL, ColorToInt(baseColor));
+        GuiSetStyle(TEXTBOX, BASE_COLOR_PRESSED, ColorToInt(backgroundColor));
+        GuiSetStyle(TEXTBOX, BORDER_COLOR_PRESSED, ColorToInt(purple));
+        GuiSetStyle(TEXTBOX, BORDER_COLOR_FOCUSED, ColorToInt(baseColor));
+        GuiSetStyle(TEXTBOX, TEXT_COLOR_PRESSED, ColorToInt(WHITE));
+        GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(focusedTextColor));
+        GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(baseTextColor));
+
         //====LOGIN-SCREEN====
         if (currentScreen == SCREEN_LOGIN)
         {
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-            int errorMessageForNameLength = MeasureText(errorMessageForName, 30);
-            int errorMessageForNamePosY = (GetScreenHeight()/2 - 15)*1.75f;
-            int errorMessageForIDLength = MeasureText(errorMessageForID, 30);
-            int errorMessageForIDPosY = (GetScreenHeight()/2 - 15) * 1.95f;
-            
-            DrawTextEx(sekuya40, studentLoginText,{studentLoginTextPos.x, studentLoginTextPos.y}, titleScale, spacing, BLACK);
-            DrawTextEx(orbitron30, nameText, {nameTextPos.x, nameTextPos.y}, subtitleScale, spacing, DARKGRAY);
-            if(GuiTextBox(nameInputBox, nameBuffer, 128, nameToggle)){
-                nameToggle = !nameToggle;
+            int errorMessageForFirstNamePosY = (GetScreenHeight() / 2 - 10) * 1.65f;
+            int errorMessageForMiddleNamePosY = (GetScreenHeight() / 2 - 10) * 1.75f;
+            int errorMessageForLastNamePosY = (GetScreenHeight() / 2 - 10) * 1.85f;
+            int errorMessageForIDPosY = (GetScreenHeight() / 2 - 10) * 1.95f;
+
+            firstNameValidity = false;
+            middleNameValidity = false;
+            lastNameValidity = false;
+            IDValidity = false;
+
+            DrawTextEx(font.torus50, text.studentLoginText, {text.studentLoginTextPos.x, text.studentLoginTextPos.y}, text.titleScale, text.spacing, white);
+            DrawTextEx(font.torus30, text.firstNameText, {text.firstNameTextPos.x, text.firstNameTextPos.y}, text.subtitleScale, text.spacing, white);
+            DrawTextEx(font.torus30, text.middleNameText, {text.middleNameTextPos.x, text.middleNameTextPos.y}, text.subtitleScale, text.spacing, white);
+            DrawTextEx(font.torus30, text.lastNameText, {text.lastNameTextPos.x, text.lastNameTextPos.y}, text.subtitleScale, text.spacing, white);
+            DrawRectangleRec(firstNameInputBox, baseColor);
+            DrawRectangleRec(middleNameInputBox, baseColor);
+            DrawRectangleRec(lastNameInputBox, baseColor);
+            DrawRectangleRec(IDInputBox, baseColor);
+            if (GuiTextBox(firstNameInputBox, firstNameBuffer, 128, firstNameToggle))
+            {
+                firstNameToggle = !firstNameToggle;
             };
-            DrawTextEx(orbitron30, IDText, {IDTextPos.x, IDTextPos.y}, subtitleScale, spacing, DARKGRAY);
-            if(GuiTextBox(IDInputBox, IDBuffer, 100, IDBoxToggle)){
+            if (GuiTextBox(middleNameInputBox, middleNameBuffer, 128, middleNameToggle))
+            {
+                middleNameToggle = !middleNameToggle;
+            };
+            if (GuiTextBox(lastNameInputBox, lastNameBuffer, 128, lastNameToggle))
+            {
+                lastNameToggle = !lastNameToggle;
+            };
+            DrawTextEx(font.torus30, text.IDText, {text.IDTextPos.x, text.IDTextPos.y}, text.subtitleScale, text.spacing, white);
+            if (GuiTextBox(IDInputBox, IDBuffer, 10, IDBoxToggle))
+            {
                 IDBoxToggle = !IDBoxToggle;
             };
-            string ID = string(IDBuffer);
-            next.Draw({(float)GetScreenWidth()/2, (float)GetScreenHeight()/1.6f}, 2, 0);
-        
-            if(next.isPressed()){
-                switch (nameInputValidation(nameBuffer)){
+            next.Draw({(float)GetScreenWidth() / 2, (float)GetScreenHeight() / 1.34f}, 0.3f, 0);
+
+            if (next.isPressed())
+            {
+                switch (nameInputValidation(firstNameBuffer))
+                {
+                case (IS_EMPTY):
+                {
+                    strcpy(errorMessageForFirstName, "[ERROR]\tYour First Name is Empty!");
+                    firstNameValidity = false;
+                    break;
+                }
+                case (HAS_PRECEDING_WHITESPACE):
+                {
+                    strcpy(errorMessageForFirstName, "[ERROR]\tPlease Remove the Preceding Whitespace(s) from your First name!");
+                    firstNameValidity = false;
+                    break;
+                }
+                case (HAS_PROCEDING_WHITESPACE):
+                {
+                    strcpy(errorMessageForFirstName, "[ERROR]\tPlease remove the Proceding Whitespace(s) from your First Name!");
+                    firstNameValidity = false;
+                    break;
+                }
+                case (HAS_WHITESPACE):
+                {
+                    strcpy(errorMessageForFirstName, "[ERROR]\tPlease remove the additional whitespace(s) from your First Name!");
+                    firstNameValidity = false;
+                    break;
+                }
+                case (HAS_NUMBERS):
+                {
+                    strcpy(errorMessageForFirstName, "[ERROR]\tYour First Name has a Number(s)!");
+                    firstNameValidity = false;
+                    break;
+                }
+                case (HAS_SYMBOLS):
+                {
+                    strcpy(errorMessageForFirstName, "[ERROR]\tYour First Name has an Invalid Character(s)!");
+                    firstNameValidity = false;
+                    break;
+                }
+                default:
+                {
+                    firstNameValidity = true;
+                    strcpy(errorMessageForFirstName, "\0");
+                }
+                }
+                switch (nameInputValidation(middleNameBuffer))
+                {
+                case (HAS_PRECEDING_WHITESPACE):
+                {
+                    strcpy(errorMessageForMiddleName, "[ERROR]\tPlease Remove the Preceding Whitespace(s) from your Middle Name!");
+                    middleNameValidity = false;
+                    break;
+                }
+                case (HAS_PROCEDING_WHITESPACE):
+                {
+                    strcpy(errorMessageForMiddleName, "[ERROR]\tPlease remove the Proceding whitespace(s) from your Middle Name!");
+                    middleNameValidity = false;
+                    break;
+                }
+                case (HAS_WHITESPACE):
+                {
+                    strcpy(errorMessageForMiddleName, "[ERROR]\tPlease remove the additional whitespace(s)!");
+                    middleNameValidity = false;
+                    break;
+                }
+                case (HAS_NUMBERS):
+                {
+                    strcpy(errorMessageForMiddleName, "[ERROR]\tText has numbers!");
+                    middleNameValidity = false;
+                    break;
+                }
+                case (HAS_SYMBOLS):
+                {
+                    strcpy(errorMessageForMiddleName, "[ERROR]\tInvalid Character(s)!");
+                    middleNameValidity = false;
+                    break;
+                }
+                default:
+                {
+                    middleNameValidity = true;
+                    strcpy(errorMessageForMiddleName, "\0");
+                }
+                }
+                switch (nameInputValidation(lastNameBuffer))
+                {
+                case (IS_EMPTY):
+                {
+                    strcpy(errorMessageForLastName, "[ERROR]\tYour Last Name is Empty!");
+                    lastNameValidity = false;
+                    break;
+                }
+                case (HAS_PRECEDING_WHITESPACE):
+                {
+                    strcpy(errorMessageForLastName, "[ERROR]\tPlease Remove the Preceding Whitespace(s) from your Last name!");
+                    lastNameValidity = false;
+                    break;
+                }
+                case (HAS_PROCEDING_WHITESPACE):
+                {
+                    strcpy(errorMessageForLastName, "[ERROR]\tPlease remove the Proceding Whitespace(s) from your Last Name!");
+                    lastNameValidity = false;
+                    break;
+                }
+                case (HAS_WHITESPACE):
+                {
+                    strcpy(errorMessageForLastName, "[ERROR]\tPlease remove the additional whitespace(s) from your Last Name!");
+                    lastNameValidity = false;
+                    break;
+                }
+                case (HAS_NUMBERS):
+                {
+                    strcpy(errorMessageForLastName, "[ERROR]\tYour Last Name has a Number(s)!");
+                    lastNameValidity = false;
+                    break;
+                }
+                case (HAS_SYMBOLS):
+                {
+                    strcpy(errorMessageForLastName, "[ERROR]\tYour Last Name has an Invalid Character(s)!");
+                    lastNameValidity = false;
+                    break;
+                }
+                default:
+                {
+                    lastNameValidity = true;
+                    strcpy(errorMessageForLastName, "\0");
+                }
+                }
+                switch (IDInputValidation(IDBuffer))
+                {
+                case INVALID_ID_FORMAT:
+                    strcpy(errorMessageForID, "[ERROR]\tYour ID should be in 7000XXXXX format!");
+                    IDValidity = false;
+                    break;
+                case IS_EMPTY:
+                    strcpy(errorMessageForID, "[ERROR]\tYour ID is Empty!");
+                    IDValidity = false;
+                    break;
+                case INSUFFICIENT_CHARACTERS:
+                    strcpy(errorMessageForID, "[ERROR]\tYour ID is not exactly 9 digits!");
+                    IDValidity = false;
+                    break;
+                case HAS_WHITESPACE:
+                    strcpy(errorMessageForID, "[ERROR]\tYour ID should not have a Whitespace(s)!");
+                    IDValidity = false;
+                    break;
+                case HAS_ALPHA_AND_OR_SYMBOLS:
+                    strcpy(errorMessageForID, "[ERROR]\tYour ID should only contain Digits!");
+                    IDValidity = false;
+                    break;
+                default:
+                    IDValidity = true;
+                    strcpy(errorMessageForID, "\0");
+                }
+            }
+
+            if (firstNameValidity && IDValidity && middleNameValidity && lastNameValidity)
+            {
+                currentScreen = SEMESTER_SCREEN;
+            }
+            else
+            {
+                DrawText(errorMessageForFirstName, 10, errorMessageForFirstNamePosY, 20, RED);
+                DrawText(errorMessageForMiddleName, 10, errorMessageForMiddleNamePosY, 20, RED);
+                DrawText(errorMessageForLastName, 10, errorMessageForLastNamePosY, 20, RED);
+                DrawText(errorMessageForID, 10, errorMessageForIDPosY, 20, RED);
+            }
+        }
+        if (currentScreen == SEMESTER_SCREEN)
+        {
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            int errorMessageForSemesterPosY = (GetScreenHeight() / 2 - 10) * 1.85f;
+            int errorMessageForYearPosY = (GetScreenHeight() / 2 - 10) * 1.95f;
+
+            semesterValidity = false;
+            yearValidity = false;
+
+            DrawTextEx(font.torus50, text.semesterDetailsText, text.semesterDetailsTextPos, text.titleScale, text.spacing, white);
+
+            DrawTextEx(font.torus30, text.semesterText, text.semesterTextPos, text.subtitleScale, text.spacing, white);
+            DrawRectangleRec(semesterInputBox, baseColor);
+            DrawRectangleRec(yearInputBox, baseColor);
+            if (GuiTextBox(semesterInputBox, semesterBuffer, 2, semesterToggle)) semesterToggle = !semesterToggle;
+            DrawTextEx(font.torus30, text.yearText, text.yearTextPos, text.subtitleScale, text.spacing, white);
+            if (GuiTextBox(yearInputBox, yearBuffer, 5, yearToggle)) yearToggle = !yearToggle;
+            confirm.Draw({(float)GetScreenWidth() / 2, (float)text.yearTextPos.y + 100}, 0.3f, 0);
+            if (confirm.isPressed())
+            {
+                switch(semesterInputValidation(semesterBuffer)){
                     case (IS_EMPTY):{
-                        strcpy(errorMessageForName, "[ERROR]\tYour name is Empty!");
-                        nameValidity = false;
+                        semesterValidity = false;
+                        strcpy(errorMessageForSemester, "[ERROR]\tSemester is Empty!");
                         break;
                     }
-                    case (HAS_PRECEDING_WHITESPACE):{
-                        strcpy(errorMessageForName, "[ERROR]\tPlease Remove the Preceding Whitespace(s)!");
-                        nameValidity = false;
+                    case (HAS_WHITESPACE):{
+                        semesterValidity = false;
+                        strcpy(errorMessageForSemester, "[ERROR]\tSemester is Empty!");
+                    }
+                    case (INVALID_CHOICE_FOR_SEMESTER):{
+                        semesterValidity = false;
+                        strcpy(errorMessageForSemester, "[ERROR]\tSemester should only be between 1-3!");
                         break;
                     }
-                    case (HAS_PROCEDING_WHITESPACE):{
-                        strcpy(errorMessageForName, "[ERROR]\tPlease remove the Proceding whitespace(s)!");
-                        nameValidity = false;
-                        break;
-                    }
-                    case (HAS_INBETWEEN_WHITESPACE):{
-                        strcpy(errorMessageForName, "[ERROR]\tPlease remove the additional whitespace(s)!");
-                        nameValidity = false;
-                        break;
-                    }
-                    case (HAS_NUMBERS):{
-                        strcpy(errorMessageForName, "[ERROR]\tText has numbers!");
-                        nameValidity = false;
-                        break;
-                    }
-                    case (HAS_SYMBOLS):{
-                        strcpy(errorMessageForName, "[ERROR]\tInvalid Character(s)!");
-                        nameValidity = false;
+                    case (HAS_ALPHA_AND_OR_SYMBOLS):{
+                        semesterValidity = false;
+                        strcpy(errorMessageForSemester, "[ERROR]\tSemester should only have an Integer(s)!");
                         break;
                     }
                     default:{
-                        nameValidity = true;
-                        strcpy(errorMessageForName, "\0");
+                        semesterValidity = true;
+                        strcpy(errorMessageForSemester, "\0");
                     }
                 }
-                
-                switch (IDInputValidation(IDBuffer)){
-                    case INVALID_ID_FORMAT:
-                        strcpy(errorMessageForID, "[ERROR]\tYour ID should be in 7000XXXXX format!");
-                        IDValidity = false;
+                switch(yearInputValidation(yearBuffer)){
+                    case (IS_EMPTY):{
+                        yearValidity = false;
+                        strcpy(errorMessageForYear, "[ERROR]\tYear is Empty!");
                         break;
-                    case IS_EMPTY:
-                        strcpy(errorMessageForID, "[ERROR]\tYour ID is Empty!");
-                        IDValidity = false;
+                    }
+                    case (HAS_WHITESPACE):{
+                        yearValidity = false;
+                        strcpy(errorMessageForYear, "[ERROR]\tRemove the Whitespace(s)!");
                         break;
-                    case INSUFFICIENT_CHARACTERS:
-                        strcpy(errorMessageForID, "[ERROR]\tYour ID is not exactly 9 digits!");
-                        IDValidity = false;
+                    }
+                    case (HAS_ALPHA_AND_OR_SYMBOLS):{
+                        yearValidity = false;
+                        strcpy(errorMessageForYear, "[ERROR]\tYear should only have Integers!");
                         break;
-                    case HAS_WHITESPACE:
-                        strcpy(errorMessageForID, "[ERROR]\tYour ID should not have a Whitespace(s)!");
-                        IDValidity = false;
-                        break;
-                    case HAS_ALPHA_AND_OR_SYMBOLS:
-                        strcpy(errorMessageForID, "[ERROR]\tYour ID should only contain Digits!");
-                        IDValidity = false;
-                        break;
-                    default:
-                        IDValidity = true;
-                        strcpy(errorMessageForID, "\0");
+                    }
+                    default:{
+                        yearValidity = true;
+                        strcpy(errorMessageForYear, "\0");
+                    }
                 }
             }
-            if (nameValidity && IDValidity){
-                currentScreen = SEMESTER_SCREEN; 
-            } else {
-                DrawText(errorMessageForName, 10, errorMessageForNamePosY, 30, RED);
-                DrawText(errorMessageForID, 10, errorMessageForIDPosY, 30, RED);
+            if(semesterValidity && yearValidity){
+                currentScreen = REGISTRATION_SCREEN;
+            }else{
+                DrawText(errorMessageForSemester, 10, errorMessageForSemesterPosY, 20, RED);
+                DrawText(errorMessageForYear, 10, errorMessageForYearPosY, 20, RED);
             }
         }
-        if (currentScreen == SEMESTER_SCREEN){
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-            Vector2 semDetTitleScale = MeasureTextEx(sekuya40, "SEMESTER DETAILS", titleScale, spacing);
-            DrawTextEx(sekuya40, "SEMESTER DETAILS", {GetScreenWidth()/2.0f - semDetTitleScale.x/2.0f, studentLoginTextPos.y}, titleScale, spacing, BLACK);
-
-            Vector2 semDetSemSelectScale = MeasureTextEx(orbitron30,"Semester (1-3):",subtitleScale, spacing);
-            DrawTextEx(orbitron30, "Semester (1-3):", {nameTextPos.x-semDetSemSelectScale.x/2.0f, nameTextPos.y}, subtitleScale, spacing, DARKGRAY);
-
-            Vector2 semDetYearSelectScale = MeasureTextEx(orbitron30,"Year:",subtitleScale,spacing);
-            DrawTextEx(orbitron30, "Year:", {IDTextPos.x-semDetYearSelectScale.x/2.0f, IDTextPos.y}, subtitleScale, spacing, DARKGRAY);
-
-            next.Draw({(float)GetScreenWidth()/2, (float)GetScreenHeight()/1.6f}, 2, 0);
-            
-        }
-        
         EndDrawing();
     }
     return 0;
