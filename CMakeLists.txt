@@ -8,14 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/output")
 
 # 2. Define Resources (Windows Icon)
-set(APP_ICON_RESOURCE "")
 if(WIN32)
     set(APP_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/app.rc")
 endif()
-
 # 3. Define the Executable
 # Combining all sources and resources into one target
-add_executable(${PROJECT_NAME} WIN32 
+add_executable(${PROJECT_NAME}
     src/main1.cpp 
     ${APP_ICON_RESOURCE}
 )
